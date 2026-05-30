@@ -68,7 +68,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100,
+    limit: 500,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
