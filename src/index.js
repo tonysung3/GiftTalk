@@ -137,8 +137,39 @@ app.use('/api/admin', require('./routes/admin'));
 
 // Sockets
 require('./sockets/chat')(io);
+// Seed endpoint
+app.get('/api/seed', (req, res) => {
+    try {
+        const gifts = [
+            { name:'Red Rose', desc:'A beautiful red rose', price:10, emoji:'🌹' },
+            { name:'Chocolate Box', desc:'Premium assorted chocolates', price:20, emoji:'🍫' },
+            { name:'Teddy Bear', desc:'Soft plush teddy bear', price:50, emoji:'🧸' },
+            { name:'Birthday Cake', desc:'Celebration cake', price:100, emoji:'🎂' },
+            { name:'Coffee Gift Set', desc:'Premium coffee bundle', price:30, emoji:'☕' },
+            { name:'Flower Bouquet', desc:'Mixed flower bouquet', price:40, emoji:'💐' },
+            { name:'Wine Bottle', desc:'Fine red wine', price:75, emoji:'🍷' },
+            { name:'Spa Package', desc:'Relaxation spa kit', price:150, emoji:'💆' },
+            { name:'Scented Candle', desc:'Luxury scented candle', price:15, emoji:'🕯️' },
+            { name:'Jewelry Box', desc:'Elegant jewelry box', price:200, emoji:'💍' }
+        ];
+        const insertGift = db.prepare('INSERT OR IGNORE INTO gifts (name, description, price_coins, image_url) VALUES (?, ?, ?, ?)');
+        gifts.forEach(g => insertGift.run(g.name, g.desc, g.price, g.emoji));
 
-// 404 Handler
+        const packs = [
+            { name:'Starter Pack', coins:100, price:2.99 },
+            { name:'Popular Pack', coins:500, price:9.99 },
+            { name:'Mega Pack', coins:1200, price:19.99 },
+            { name:'Ultimate Pack', coins:3000, price:39.99 }
+        ];
+        const insertPack = db.prepare('INSERT OR IGNORE INTO coin_packs (name, coins, price_usd) VALUES (?, ?, ?)');
+        packs.forEach(p => insertPack.run(p.name, p.coins, p.price));
+
+        res.json({ success: true, gifts: db.prepare('SELECT COUNT(*) as c FROM gifts').get().c, coinPacks: db.prepare('SELECT COUNT(*) as c FROM coin_packs').get().c });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Not Found' });
 });
